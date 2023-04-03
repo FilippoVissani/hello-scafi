@@ -29,11 +29,11 @@ object HelloScafi extends App {
   // And that the source of the gradient is the device no. 2
   // Then, the expected result once the gradient has stabilised is: {1 -> 1, 2 -> 0, 3 -> 1, 4 -> 2, 5 -> 3}
   case class DeviceState(
-      self: ID,
-      exports: Map[ID, EXPORT],
-      localSensors: Map[CNAME, Any],
-      nbrSensors: Map[CNAME, Map[ID, Any]]
-  )
+                          self: ID,
+                          exports: Map[ID, EXPORT],
+                          localSensors: Map[CNAME, Any],
+                          nbrSensors: Map[CNAME, Map[ID, Any]]
+                        )
   val devices = 1 to 5
   var state: Map[ID, DeviceState] = (for {
     d <- devices
@@ -54,7 +54,11 @@ object HelloScafi extends App {
       lsens = state(d).localSensors,
       nbsens = state(d).nbrSensors
     )
-    println(s"RUN: DEVICE $d\n\tCONTEXT: ${state(d)}")
+    println(s"RUN: DEVICE $d")
+    println(s"\tCONTEXT BEFORE:")
+    println(s"\t\tEXPORTS: ${state(d).exports}")
+    println(s"\t\tNBR SENSORS: ${state(d).nbrSensors}")
+    println(s"\t\tLOCAL SENSORS: ${state(d).localSensors}")
     val export = program.round(ctx)
     state += d -> state(d).copy(exports = state(d).exports + (d -> export)) // update d's state
     // Simulate sending of messages to neighbours
@@ -62,6 +66,15 @@ object HelloScafi extends App {
       .nbrSensors(NBR_RANGE)
       .keySet
       .foreach(nbr => state += nbr -> state(nbr).copy(exports = state(nbr).exports + (d -> export)))
-    println(s"\tEXPORT: $export\n\tOUTPUT: ${export.root()}\n--------------")
+    println(s"\tCONTEXT AFTER:")
+    println(s"\t\tEXPORTS: ${state(d).exports}")
+    println(s"\t\tNBR SENSORS: ${state(d).nbrSensors}")
+    println(s"\t\tLOCAL SENSORS: ${state(d).localSensors}")
+    println(s"\tEXPORT:")
+    for(x <- export.paths){
+      println(s"\t\t$x")
+    }
+    println(s"\tOUTPUT: ${export.root()}")
+    println("---------------------")
   }
 }
