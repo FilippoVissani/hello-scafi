@@ -55,8 +55,12 @@ object HelloScafi extends App {
       nbsens = state(d).nbrSensors
     )
     println(s"RUN: DEVICE $d")
-    println(s"\tCONTEXT BEFORE:")
-    println(s"\t\tEXPORTS: ${state(d).exports}")
+    println(s"\tCONTEX:")
+    println(s"\t\tEXPORTS:")
+    state(d).exports.foreach(e => {
+      println(s"\t\t\tID ${e._1}:")
+      e._2.paths.foreach(p => println(s"\t\t\t\t$p"))
+    })
     println(s"\t\tNBR SENSORS: ${state(d).nbrSensors}")
     println(s"\t\tLOCAL SENSORS: ${state(d).localSensors}")
     val export = program.round(ctx)
@@ -66,14 +70,8 @@ object HelloScafi extends App {
       .nbrSensors(NBR_RANGE)
       .keySet
       .foreach(nbr => state += nbr -> state(nbr).copy(exports = state(nbr).exports + (d -> export)))
-    println(s"\tCONTEXT AFTER:")
-    println(s"\t\tEXPORTS: ${state(d).exports}")
-    println(s"\t\tNBR SENSORS: ${state(d).nbrSensors}")
-    println(s"\t\tLOCAL SENSORS: ${state(d).localSensors}")
     println(s"\tEXPORT:")
-    for(x <- export.paths){
-      println(s"\t\t$x")
-    }
+    export.paths.foreach(p => println(s"\t\t$p"))
     println(s"\tOUTPUT: ${export.root()}")
     println("---------------------")
   }
