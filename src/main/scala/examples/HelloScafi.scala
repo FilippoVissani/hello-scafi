@@ -1,5 +1,6 @@
 package examples
 
+import com.typesafe.scalalogging.Logger
 import it.unibo.scafi.incarnations.BasicAbstractIncarnation
 
 // 1. Define (or import) an incarnation, which provides an instantiation of types and other classes to import
@@ -20,6 +21,7 @@ class GradientProgram extends AggregateProgram {
 
 // 4. In your program, implement an "execution loop" whereby your device or system executes the aggregate program
 object HelloScafi extends App {
+  val logger: Logger = Logger("logback")
   val program = new GradientProgram()
   // Import standard sensors name define in incarnation
   val sensorsNames = new StandardSensorNames {}
@@ -54,15 +56,15 @@ object HelloScafi extends App {
       lsens = state(d).localSensors,
       nbsens = state(d).nbrSensors
     )
-    println(s"RUN: DEVICE $d")
-    println(s"\tCONTEX:")
-    println(s"\t\tEXPORTS:")
+    logger.info(s"RUN: DEVICE $d")
+    logger.info(s"\tCONTEX:")
+    logger.info(s"\t\tEXPORTS:")
     state(d).exports.foreach(e => {
-      println(s"\t\t\tID ${e._1}:")
-      e._2.paths.foreach(p => println(s"\t\t\t\t$p"))
+      logger.info(s"\t\t\tID ${e._1}:")
+      e._2.paths.foreach(p => logger.info(s"\t\t\t\t$p"))
     })
-    println(s"\t\tNBR SENSORS: ${state(d).nbrSensors}")
-    println(s"\t\tLOCAL SENSORS: ${state(d).localSensors}")
+    logger.info(s"\t\tNBR SENSORS: ${state(d).nbrSensors}")
+    logger.info(s"\t\tLOCAL SENSORS: ${state(d).localSensors}")
     val export = program.round(ctx)
     state += d -> state(d).copy(exports = state(d).exports + (d -> export)) // update d's state
     // Simulate sending of messages to neighbours
@@ -70,9 +72,9 @@ object HelloScafi extends App {
       .nbrSensors(NBR_RANGE)
       .keySet
       .foreach(nbr => state += nbr -> state(nbr).copy(exports = state(nbr).exports + (d -> export)))
-    println(s"\tEXPORT:")
-    export.paths.foreach(p => println(s"\t\t$p"))
-    println(s"\tOUTPUT: ${export.root()}")
-    println("---------------------")
+    logger.info(s"\tEXPORT:")
+    export.paths.foreach(p => logger.info(s"\t\t$p"))
+    logger.info(s"\tOUTPUT: ${export.root()}")
+    logger.info("---------------------")
   }
 }
